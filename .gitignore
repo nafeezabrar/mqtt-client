@@ -1,0 +1,12 @@
+### Gradle template
+.gradle/
+gradle/
+build/
+
+### JetBrains template
+
+## Directory-based project format:
+.idea/
+
+## File-based project format:
+*.iws

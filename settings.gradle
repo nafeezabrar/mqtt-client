@@ -1,0 +1,6 @@
+rootProject.name = 'mqtt-client'
+
+include 'main'
+include 'ui'
+include 'core'
+include 'paho-mqtt'
