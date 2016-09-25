@@ -79,8 +79,14 @@ public class Main {
 //        mqttClientWindow.sendMessage(electricalTopic, relayStatusOffElectricalMessage);
         mqttClientWindow.sendMessage(electricalTopic, loadLimitCrossedElectricalMessage);
 
-        while (true) {
-            Thread.sleep(5000);
+
+        System.out.println("MQTT Client in Running...");
+        try {
+            int totalRun = 1;
+            for (int i = 0; i < totalRun; i++)
+                Thread.sleep(5000);
+        } finally {
+            mqttClient.close();
         }
     }
 }
