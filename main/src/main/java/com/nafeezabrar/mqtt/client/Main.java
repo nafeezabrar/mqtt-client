@@ -33,8 +33,7 @@ public class Main {
                 "0x01, " +
                 "0x1A ";
 
-
-        String electricalMessageRelayStatusOff = "" +
+        String relayStatusOffElectricalMessage = "" +
                 "16," +
                 "54, 16, 90,  3, 45, 30" +
                 " 8, 24, 20, 16,  7,  1, 16, " +
@@ -45,6 +44,19 @@ public class Main {
                 " 0,  0, 22, 100, " +
                 " 0,  0, 48, 39, " +
                 "0x00, " +
+                "0x1A ";
+
+        String loadLimitCrossedElectricalMessage = "" +
+                "16," +
+                "54, 16, 90, 03, 45, 30" +
+                " 8, 24, 20, 16,  7,  1, 16, " +
+                "86, 80, " +
+                "04, 75, " +
+                "0x52, 0x09, " +
+                "39, 15, " +
+                " 0,  0, 22, 100, " +
+                " 0,  0, 48, 39, " +
+                "0x01, " +
                 "0x1A ";
 
         String[] topicFilters = new String[]{"E/1/54169003453"};
@@ -63,8 +75,9 @@ public class Main {
 
         mqttClientWindow.sendMessage(registrationTopic, registrationMessage);
 
-        mqttClientWindow.sendMessage(electricalTopic, electricalMessage);
-        mqttClientWindow.sendMessage(electricalTopic, electricalMessageRelayStatusOff);
+//        mqttClientWindow.sendMessage(electricalTopic, electricalMessage);
+//        mqttClientWindow.sendMessage(electricalTopic, relayStatusOffElectricalMessage);
+        mqttClientWindow.sendMessage(electricalTopic, loadLimitCrossedElectricalMessage);
 
         while (true) {
             Thread.sleep(5000);
