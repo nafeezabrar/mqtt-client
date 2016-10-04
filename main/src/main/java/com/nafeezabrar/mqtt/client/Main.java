@@ -1,7 +1,10 @@
 package com.nafeezabrar.mqtt.client;
 
-public class Main {
-    public static void main(String[] args) {
+import com.nafeezabrar.mqtt.client.ui.UiApplication;
 
+public class Main {
+
+    public static void main(String[] args) {
+        UiApplication.run(args);
     }
 }
