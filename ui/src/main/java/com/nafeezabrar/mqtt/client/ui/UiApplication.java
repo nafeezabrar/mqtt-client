@@ -6,17 +6,17 @@ import com.nafeezabrar.mqtt.client.ui.libs.SceneLoader;
 import com.nafeezabrar.mqtt.client.ui.libs.ViewRenderer;
 import com.nafeezabrar.mqtt.client.ui.libs.ViewSwitcher;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class UiApplication extends Application {
 
     public static MqttClientWindow ActualWindow;
     public static ViewActivatedListener viewActivatedListener;
+    private static Class loaderClass;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        SceneLoader sceneLoader = new SceneLoader();
+        SceneLoader sceneLoader = new SceneLoader(loaderClass);
         SceneFactory sceneFactory = new SceneFactory();
         ViewRenderer viewRender = new ViewRenderer(primaryStage, sceneLoader, sceneFactory);
         ViewSwitcher viewSwitcher = new ViewSwitcher(viewRender);
@@ -25,7 +25,8 @@ public class UiApplication extends Application {
         primaryStage.show();
     }
 
-    public static void run(String[] args) {
+    public static void run(String[] args, Class loaderClass) {
+        UiApplication.loaderClass = loaderClass;
         launch(args);
     }
 

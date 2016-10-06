@@ -8,7 +8,7 @@ public class ViewSwitcher {
     }
 
     public void switchToMainView() {
-        renderer.renderView("../../../../../../main.fxml", 950, 700);
+        renderer.renderView("main.fxml", 950, 700);
         renderer.setTitle("MQTT Client");
     }
 }

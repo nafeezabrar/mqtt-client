@@ -7,9 +7,15 @@ import java.io.IOException;
 
 
 public class SceneLoader {
+    private Class loaderClass;
+
+    public SceneLoader(Class loaderClass) {
+        this.loaderClass = loaderClass;
+    }
+
     public Parent loadView(String fxmlFileName) {
         try {
-            return FXMLLoader.load(getClass().getResource(fxmlFileName));
+            return FXMLLoader.load(loaderClass.getResource(fxmlFileName));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
