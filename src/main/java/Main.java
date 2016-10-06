@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        String serverURI = "tcp://iot.eclipse.org:1883";
+        String serverURI = "tcp://192.168.11.248:1883";
         String clientId = UUID.randomUUID().toString();
         MqttClient mqttClient = new PahoMqttClientWrapper(serverURI, clientId);
 
