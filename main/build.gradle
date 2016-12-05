@@ -14,5 +14,6 @@ dependencies {
     compile project(':core')
     compile project(':ui')
     compile project(':paho-mqtt')
+    compile project(':smart-meter')
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
