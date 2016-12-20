@@ -22,7 +22,6 @@ public class Main {
     private static final String billingTopic = "E/1/Billing";
     private static final String tokenResponseTopic = "E/1/TknRsp";
     private static String meterTopic;
-    private static String testTopic;
 
     public static void main(String[] args) throws InterruptedException, IOException {
         MessageBytesGenerator messageBytesGenerator = createMessageBytesGenerator();
@@ -36,45 +35,39 @@ public class Main {
 
         byte[] registrationAcknowledgementMessageBytes = messageBytesGenerator.getRegistrationAcknowledgementMessageBytes(meterNo, false);
 
-        String electricalMessage = "" +
-                "33 " +
-                "54, 16, 90, 03, 45, 30, " +
-                "20, 16,  8, 24,  12,  1, 16, " +
-                "86, 80, " +
-                "04, 75, " +
-                "12, 25, " +
-                "05, 19, " +
-                "39, 15, " +
-                " 0,  0, 22, 100, " +
-                " 0,  0,  0, 12, " +
-                "0x1A ";
+        byte[] electricalMessageBytes = new byte[]
+                {
+                        (byte) 38,
+                        (byte) 54, (byte) 16, (byte) 90, (byte) 7, (byte) 96, (byte) 70,
+                        (byte) 20, (byte) 16, (byte) 8, (byte) 26, (byte) 8, (byte) 1, (byte) 30, // 2016-08-24 07:01:16 YYYY MM DD HH MM SS
+                        (byte) 0x56, (byte) 0x50, // Voltage (220.96)
+                        (byte) 0x04, (byte) 0x4B, // Current (10.99)
+                        (byte) 0x05, (byte) 0x3C, // Load Threshold (13.40)
+                        (byte) 0x05, (byte) 0x13, // Active Power (12.99)
+                        (byte) 0x27, (byte) 0x0F, // Max Monthly Demand (99.99)
+                        (byte) 0x00, (byte) 0x00, (byte) 0x30, (byte) 0x80, // Accumulative Active Consumption 123.27
+                        (byte) 0x00, (byte) 0x00, (byte) 0x06, (byte) 0x40, // Meter Constant
+                        (byte) 0x04, (byte) 0xD2, // Power Factor (1.234)
+                        (byte) 0x16, (byte) 0x2E, // Frequency (56.78)
+                        (byte) 2, // Relay Status Off and Terminal Cover Open
+                        (byte) 0x1A // Checksum
+                };
 
-        String loadLimitCrossedElectricalMessage = "" +
-                "33 " +
-                "54, 16, 90, 03, 45, 30, " +
-                "20, 16,  8, 24,  7,  1, 16, " +
-                "86, 80, " +
-                "04, 75, " +
-                "12, 25, " +
-                "0x52, 0x09, " +
-                "39, 15, " +
-                " 0,  0, 22, 100, " +
-                " 0,  0,  0, 12, " +
-                "0x1A ";
-
-        String billingMessage = "" +
-                "39 " +
-                "54, 16, 90, 03, 45, 30, " +
-                "20, 16,  8, 24,  8,  1, 16, " +
-                "0x01, 0xA4, 0x17, 0xE7, " +
-                "0x00, 0x00, 0x80, 0x20, " +
-                "0x00, 0x01, 0x1E, 0x49, " +
-                "0x00, 0x00, 0x3A, 0x98, " +
-                "0x00, 0x00, 0xC3, 0x50, " +
-                "0x03, " +
-                "0x0A, " +
-                "0x00, 0x7F, " +
-                "0x1A ";
+        byte[] billingMessageBytes = new byte[]
+                {
+                        (byte) 39,
+                        (byte) 54, (byte) 16, (byte) 90, (byte) 7, (byte) 96, (byte) 70,
+                        (byte) 20, (byte) 16, (byte) 8, (byte) 24, (byte) 7, (byte) 1, (byte) 16, // 2016-08-24 07:01:16 YYYY MM DD HH MM SS
+                        (byte) 0x21, (byte) 0x66, (byte) 0xD1, (byte) 0xB2, // AccumulativePurchasedCredit (5603864.82)
+                        (byte) 0xFF, (byte) 0xFF, (byte) 0xE1, (byte) 0xEC, // RemainingCredit (-77.00)
+                        (byte) 0x00, (byte) 0x01, (byte) 0xE9, (byte) 0xFB, // CreditUsedInCurrentMonth (1254.35)
+                        (byte) 0x00, (byte) 0x00, (byte) 0x13, (byte) 0x88, // LowCreditAlertValue (50)
+                        (byte) 0x00, (byte) 0x00, (byte) 0x27, (byte) 0x10, // EmergencyCreditLimit (100)
+                        (byte) 0x0C, // TariffIndex (12)
+                        (byte) 0x07, // SequenceNo (7)
+                        (byte) 0x00, (byte) 0x48, // KeyNo (72)
+                        (byte) 0x1A // Checksum
+                };
 
         String[] tokenNos = new String[]{
                 "05939856526755136829",
@@ -108,13 +101,13 @@ public class Main {
         meterTopic = MessageFormat.format("E/1/{0}0", meterNo);
 
 
-        testTopic = "Test";
-        String[] topicFilters = new String[]{meterTopic, registrationTopic, electricalTopic, billingTopic, tokenResponseTopic, testTopic};
+        String[] topicFilters = new String[]{meterTopic, registrationTopic, electricalTopic, billingTopic, tokenResponseTopic};
 
         String remoteServerURI = "tcp://192.168.11.50:1883";
+        String pdbServerURI = "tcp://119.148.42.42:1883";
         String localServerURI = "tcp://localhost:1883";
         String cloudMqttServerURI = "tcp://m21.cloudmqtt.com:19811";
-        String serverURI = cloudMqttServerURI;
+        String serverURI = remoteServerURI;
         String clientId = UUID.randomUUID().toString();
 
         StringToBytesConverter stringToBytesConverter = new AnySeparatorStringToBytesConverter();
@@ -126,44 +119,21 @@ public class Main {
 
         mqttClientWindow.fireSubscribedButtonClicked();
 
-//        String registrationMessage = bytesToStringConverter.convertBytesToString(registrationMessageBytes);
-//        mqttClientWindow.sendMessage(registrationTopic, registrationMessage);
-
-//        String registrationAcknowledgementMessage = bytesToStringConverter.convertBytesToString(registrationAcknowledgementMessageBytes);
-//        mqttClientWindow.sendMessage(meterTopic, registrationAcknowledgementMessage);
-
-//        mqttClientWindow.sendMessage(billingTopic, billingMessage);
-
-
-//        mqttClientWindow.sendMessage(electricalTopic, electricalMessage);
-//        mqttClientWindow.sendMessage(electricalTopic, loadLimitCrossedElectricalMessage);
-
-//        mqttClient.setEventListener((topic, message) -> {
-//            System.out.println(String.format("Received Topic - %s Message - %s", topic, bytesToStringConverter.convertBytesToString(message)));
+//        mqttClient.sendMessage(registrationTopic, registrationMessageBytes);
 //
-//            if (message[0] == 19 && message[1] == 1) {
-//                int sourcePadding = 8;
-//                int destinationPadding = 14;
-//                for (int i = 0; i < 10; i++) {
-//                    tokenResponseBytes[destinationPadding + i] = message[sourcePadding + i];
-//                }
-//
-//                String tokenResponseMessage = bytesToStringConverter.convertBytesToString(tokenResponseBytes);
-//                System.out.println(String.format("Sending Topic - %s Message - %s", topic, tokenResponseMessage));
-//                mqttClientWindow.sendMessage(tokenResponseTopic, tokenResponseMessage);
-//            }
-//        });
+//        mqttClient.sendMessage(meterTopic, registrationAcknowledgementMessageBytes);
 
-        String tokenResponseMessage = bytesToStringConverter.convertBytesToString(tokenResponseBytes[0]);
-        mqttClientWindow.sendMessage(tokenResponseTopic, tokenResponseMessage);
+//        mqttClient.sendMessage(billingTopic, billingMessageBytes);
+
+        mqttClient.sendMessage(electricalTopic, electricalMessageBytes);
+
+//        mqttClient.sendMessage(tokenResponseTopic, tokenResponseBytes[0]);
 
         System.out.println("MQTT Client in Running...");
         try {
-            int totalRun = 12;
-            for (int i = 0; i < totalRun; i++) {
-                mqttClientWindow.sendMessage(testTopic, "1:2:3");
+            int totalRun = 1;
+            for (int i = 0; i < totalRun; i++)
                 Thread.sleep(5000);
-            }
         } finally {
             mqttClient.close();
             System.out.println("MQTT Client is Stopped");
