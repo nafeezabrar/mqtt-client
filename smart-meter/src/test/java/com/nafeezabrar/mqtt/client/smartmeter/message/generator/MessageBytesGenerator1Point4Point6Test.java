@@ -1,5 +1,6 @@
 package com.nafeezabrar.mqtt.client.smartmeter.message.generator;
 
+import com.nafeezabrar.mqtt.client.smartmeter.data.EventCounts;
 import com.nafeezabrar.mqtt.client.smartmeter.data.Phase;
 import com.nafeezabrar.mqtt.client.smartmeter.data.TokenStatus;
 import com.nafeezabrar.mqtt.client.smartmeter.utility.CurrentTimestampProviderStub;
@@ -66,6 +67,27 @@ public class MessageBytesGenerator1Point4Point6Test {
     }
 
     @Test
+    public void generateEventStatusMessageCorrectly() throws Exception {
+        byte[] expectedMessageBytes = new byte[]{
+                29, // message length
+                54, 16, 90, 3, 45, 30, // meter id
+                20, 16, 4, 12, 23, 56, 41, // 12-04-2015 23:56:41 YYYY MM DD HH MM SS
+                0, 15, 0, 22, 0, 43, 0, 21, 0, 33, 0, 22, 0, 14, // event occurrence
+                0x45 // Checksum
+        };
+        EventCounts eventCounts = new EventCounts();
+        eventCounts.openCoverTamperEventCount = 15;
+        eventCounts.currentUnbalancedTamperEventCount = 22;
+        eventCounts.reverseTamperEventCount = 43;
+        eventCounts.overLoadEventCount = 21;
+        eventCounts.overCurrentEventCount = 33;
+        eventCounts.lowVoltageEventCount = 22;
+        eventCounts.highVoltageEventCount = 14;
+        byte[] actualMessageBytes = messageGenerator.getEventStatusMessageBytes(54169003453L, eventCounts);
+        assertArrayEquals(expectedMessageBytes, actualMessageBytes);
+    }
+
+    @Test
     public void generatesMeterNoBytesCorrectly() throws Exception {
         assertMeterNoBytes(54169003453L, new byte[]{54, 16, 90, 3, 45, 30});
         assertMeterNoBytes(54169001234L, new byte[]{54, 16, 90, 1, 23, 40});
@@ -92,6 +114,54 @@ public class MessageBytesGenerator1Point4Point6Test {
 
     private void assertTokenNoBytes(String tokenNo, byte[] expectedBytes) {
         byte[] bytes = messageGenerator.getTokenNoBytes(tokenNo);
+        assertArrayEquals(expectedBytes, bytes);
+    }
+
+    @Test
+    public void generateEventCountsBytesCorrectly() throws Exception {
+        EventCounts eventCounts1 = new EventCounts();
+        eventCounts1.openCoverTamperEventCount = 15;
+        eventCounts1.currentUnbalancedTamperEventCount = 22;
+        eventCounts1.reverseTamperEventCount = 43;
+        eventCounts1.overLoadEventCount = 21;
+        eventCounts1.overCurrentEventCount = 33;
+        eventCounts1.lowVoltageEventCount = 22;
+        eventCounts1.highVoltageEventCount = 14;
+        assertEventCountsBytes(eventCounts1, new byte[]{0, 15, 0, 22, 0, 43, 0, 21, 0, 33, 0, 22, 0, 14});
+
+        EventCounts eventCounts2 = new EventCounts();
+        eventCounts2.openCoverTamperEventCount = 453;
+        eventCounts2.currentUnbalancedTamperEventCount = 10253;
+        eventCounts2.reverseTamperEventCount = 45896;
+        eventCounts2.overLoadEventCount = 63069;
+        eventCounts2.overCurrentEventCount = 58963;
+        eventCounts2.lowVoltageEventCount = 23653;
+        eventCounts2.highVoltageEventCount = 12596;
+        assertEventCountsBytes(eventCounts2, new byte[]{
+                (byte) 0x01, (byte) 0xc5,
+                (byte) 0x28, (byte) 0x0D,
+                (byte) 0xB3, (byte) 0x48,
+                (byte) 0xF6, (byte) 0x5D,
+                (byte) 0xE6, (byte) 0x53,
+                (byte) 0x5C, (byte) 0x65,
+                (byte) 0x31, (byte) 0x34
+        });
+    }
+
+    private void assertEventCountsBytes(EventCounts eventCounts, byte[] expectedBytes) {
+        byte[] bytes = messageGenerator.getEventCountsBytes(eventCounts);
+        assertArrayEquals(expectedBytes, bytes);
+    }
+
+    @Test
+    public void generateIntInTwoBytesCorrectly() throws Exception {
+        assertIntInTwoBytes(15, new byte[]{0, 15});
+        assertIntInTwoBytes(0xF43E, new byte[]{(byte) 0xF4, (byte) 0x3E});
+        assertIntInTwoBytes(63563, new byte[]{(byte) 248, (byte) 75});
+    }
+
+    private void assertIntInTwoBytes(int number, byte[] expectedBytes) {
+        byte[] bytes = messageGenerator.getIntInTwoBytes(number);
         assertArrayEquals(expectedBytes, bytes);
     }
 

@@ -1,5 +1,6 @@
 package com.nafeezabrar.mqtt.client.smartmeter.message.generator;
 
+import com.nafeezabrar.mqtt.client.smartmeter.data.EventCounts;
 import com.nafeezabrar.mqtt.client.smartmeter.data.Phase;
 import com.nafeezabrar.mqtt.client.smartmeter.data.TokenStatus;
 import com.nafeezabrar.mqtt.client.smartmeter.utility.CurrentTimestampProvider;
@@ -16,6 +17,7 @@ public class MessageBytesGenerator1Point4Point6 implements MessageBytesGenerator
     protected static final int registrationAcknowledgementMessageLength = 10;
     protected static final byte registrationAcknowledgementMessageTypeId = 0;
     protected static final int tokenResponseMessageLength = 26;
+    protected static final int eventStatusMessageLength = 29;
     protected final CurrentTimestampProvider currentTimestampProvider;
 
     public MessageBytesGenerator1Point4Point6(CurrentTimestampProvider currentTimestampProvider) {
@@ -48,6 +50,15 @@ public class MessageBytesGenerator1Point4Point6 implements MessageBytesGenerator
         byte[] tokenNoBytes = getTokenNoBytes(tokenNo);
         fillUpBytes(bytes, tokenNoBytes, 14, 24);
         bytes[24] = tokenStatus.getMessageByte();
+        bytes[bytes.length - 1] = getChecksum(bytes, 0, bytes.length);
+        return bytes;
+    }
+
+    @Override
+    public byte[] getEventStatusMessageBytes(long meterNo, EventCounts eventCounts) {
+        byte[] bytes = createMeterMessageBytesWithInitialFillUp(eventStatusMessageLength, meterNo);
+        byte[] eventCountsBytes = getEventCountsBytes(eventCounts);
+        fillUpBytes(bytes, eventCountsBytes, 14, 28);
         bytes[bytes.length - 1] = getChecksum(bytes, 0, bytes.length);
         return bytes;
     }
@@ -125,5 +136,24 @@ public class MessageBytesGenerator1Point4Point6 implements MessageBytesGenerator
             bytes[i] = (byte) (upper * 10 + lower);
         }
         return bytes;
+    }
+
+    public byte[] getEventCountsBytes(EventCounts eventCounts) {
+        int eventCountLength = 14;
+        byte[] bytes = new byte[eventCountLength];
+
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.openCoverTamperEventCount), 0, 2);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.currentUnbalancedTamperEventCount), 2, 4);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.reverseTamperEventCount), 4, 6);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.overLoadEventCount), 6, 8);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.overCurrentEventCount), 8, 10);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.lowVoltageEventCount), 10, 12);
+        fillUpBytes(bytes, getIntInTwoBytes(eventCounts.highVoltageEventCount), 12, 14);
+
+        return bytes;
+    }
+
+    public byte[] getIntInTwoBytes(int i) {
+        return new byte[]{(byte) (i / 256), (byte) (i % 256)};
     }
 }
